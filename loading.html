@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Загрузка...</title>
+
+    <!-- Подключаем шрифт Share Tech Mono (локально) -->
     <style>
+        @font-face {
+            font-family: 'Share Tech Mono';
+            src: url('./resource/fonts/ShareTechMonoRegular_0.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,10 +24,11 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Share Tech Mono', 'Arial', monospace;
+            background: #0a0a0c;
         }
 
-        /* Контейнер для фона с анимацией */
+        /* Контейнер для фоновых изображений */
         #bg-container {
             position: fixed;
             top: 0;
@@ -26,7 +36,7 @@
             width: 100%;
             height: 100%;
             z-index: 0;
-            background: #1a1a2e; /* цвет на случай, если картинки не загрузятся */
+            background: #0a0a0c;
         }
 
         .bg-image {
@@ -45,14 +55,14 @@
             opacity: 1;
         }
 
-        /* Затемнение для лучшей читаемости текста */
+        /* Полупрозрачное затемнение */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.55);
+            background: rgba(10, 10, 12, 0.65);
             z-index: 1;
         }
 
@@ -64,10 +74,10 @@
             z-index: 2;
             max-width: 220px;
             height: auto;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.7));
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.8));
         }
 
-        /* Центральный текст */
+        /* Центральный блок */
         .center-text {
             position: absolute;
             top: 50%;
@@ -76,66 +86,89 @@
             z-index: 2;
             color: #fff;
             text-align: center;
-            text-shadow: 0 0 30px rgba(0,0,0,0.9);
+            text-shadow: 0 0 30px rgba(0,0,0,0.95);
             pointer-events: none;
         }
 
         .center-text h1 {
-            font-size: 4rem;
-            letter-spacing: 4px;
+            font-size: 3.8rem;
+            letter-spacing: 6px;
             margin-bottom: 10px;
             font-weight: 700;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        .center-text h1 span {
+            color: #cc0000;
         }
 
         .center-text p {
             font-size: 1.5rem;
-            opacity: 0.8;
+            opacity: 0.75;
             font-weight: 300;
+            letter-spacing: 2px;
+            color: #dddddd;
         }
 
-        /* Кнопка включения музыки (по центру снизу) */
-        #music-btn {
+        /* Нижняя информационная строка (стиль как в голосовании) */
+        .bottom-bar {
             position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3;
-            padding: 12px 28px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 40px;
-            color: #fff;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.3s;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2;
+            background: rgba(10, 10, 12, 0.9);
+            border-top: 2px solid #880000;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #aaa;
+            font-size: 0.9rem;
             letter-spacing: 1px;
-            font-weight: 400;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            text-transform: uppercase;
         }
 
-        #music-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: #fff;
-            transform: translateX(-50%) scale(1.03);
+        .bottom-bar .left {
+            color: #aaa;
         }
 
-        #music-btn.playing {
-            background: rgba(255, 200, 50, 0.2);
-            border-color: #ffd966;
+        .bottom-bar .right {
+            color: #888;
+        }
+
+        .bottom-bar .highlight {
+            color: #cc0000;
+            font-weight: bold;
+        }
+
+        /* Маленькая анимация точек загрузки */
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.8s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
         }
 
         /* Адаптивность */
         @media (max-width: 768px) {
-            .center-text h1 { font-size: 2.5rem; }
+            .center-text h1 { font-size: 2.2rem; letter-spacing: 3px; }
             .center-text p { font-size: 1rem; }
             #logo { max-width: 140px; top: 20px; left: 20px; }
+            .bottom-bar { flex-direction: column; gap: 6px; padding: 12px 20px; font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Контейнер фоновых картинок -->
+    <!-- Контейнер фонов -->
     <div id="bg-container"></div>
 
     <!-- Затемнение -->
@@ -144,16 +177,19 @@
     <!-- Логотип -->
     <img id="logo" src="./images/logo.png" alt="Логотип сервера" onerror="this.style.display='none'">
 
-    <!-- Центральный текст (можно изменить под свой сервер) -->
+    <!-- Центральный текст -->
     <div class="center-text">
-        <h1>НАЗВАНИЕ СЕРВЕРА</h1>
-        <p>Загрузка аддонов...</p>
+        <h1><span>НАЗВАНИЕ</span> СЕРВЕРА</h1>
+        <p>Загрузка аддонов <span class="loading-dots"></span></p>
     </div>
 
-    <!-- Кнопка для включения музыки -->
-    <button id="music-btn" class="playing">🎵 Включить музыку</button>
+    <!-- Нижняя панель (информация, стиль как в голосовании) -->
+    <div class="bottom-bar">
+        <span class="left">⚡ <span class="highlight">Добро пожаловать</span> &nbsp;|&nbsp; <span id="map-name">Карта загружается...</span></span>
+        <span class="right">v1.0 &nbsp;|&nbsp; <span id="players-count">0</span> игроков</span>
+    </div>
 
-    <!-- Аудио элемент (скрытый) -->
+    <!-- Аудио (автозапуск, но браузер может заблокировать) -->
     <audio id="bg-music" loop preload="auto">
         <source src="./music/theme.mp3" type="audio/mpeg">
         Ваш браузер не поддерживает аудио.
@@ -162,28 +198,17 @@
     <script>
         (function() {
             // ---- Список фоновых изображений (PNG) ----
-            // Добавьте сюда свои файлы (имена или пути)
             const backgrounds = [
                 './images/backgrounds/1.png',
                 './images/backgrounds/2.png',
                 './images/backgrounds/3.png',
                 './images/backgrounds/4.png',
-                // ... продолжайте список
+                // добавляйте свои
             ];
 
-            // ---- Настройки смены фона ----
-            const intervalMs = 10000;      // пауза между сменами (10 сек)
-            const fadeDuration = 2500;     // длительность перехода (2.5 сек)
-
-            // ---- Элементы DOM ----
+            const intervalMs = 10000;   // 10 секунд между сменами
             const container = document.getElementById('bg-container');
-            const musicBtn = document.getElementById('music-btn');
             const audio = document.getElementById('bg-music');
-
-            // ---- Переменные состояния ----
-            let currentIndex = 0;
-            let timerId = null;
-            let isPlaying = false;
 
             // ---- Создаём элементы картинок ----
             backgrounds.forEach((src, index) => {
@@ -195,84 +220,55 @@
             });
 
             const images = container.querySelectorAll('.bg-image');
+            let currentIndex = 0;
+            let timerId = null;
 
-            // ---- Функция смены фона ----
             function nextBackground() {
-                // Убираем активный класс у текущего
                 images[currentIndex].classList.remove('active');
-                // Переходим к следующему
                 currentIndex = (currentIndex + 1) % images.length;
                 images[currentIndex].classList.add('active');
             }
 
-            // ---- Запускаем таймер смены фонов ----
-            function startSlideshow() {
-                if (timerId) clearInterval(timerId);
+            if (images.length > 0) {
                 timerId = setInterval(nextBackground, intervalMs);
             }
 
-            // ---- Управление музыкой ----
-            function toggleMusic() {
-                if (isPlaying) {
-                    audio.pause();
-                    isPlaying = false;
-                    musicBtn.textContent = '🎵 Включить музыку';
-                    musicBtn.classList.remove('playing');
-                } else {
-                    // Попытка воспроизведения (может быть заблокирована браузером)
-                    audio.play().then(() => {
-                        isPlaying = true;
-                        musicBtn.textContent = '🔊 Музыка играет';
-                        musicBtn.classList.add('playing');
-                    }).catch(() => {
-                        // Если блокировка – показываем сообщение
-                        alert('Для воспроизведения музыки нажмите на страницу, затем снова нажмите кнопку.');
-                        // Повторная попытка по клику будет работать
-                    });
-                }
-            }
+            // ---- Автовоспроизведение музыки ----
+            let musicStarted = false;
 
-            // ---- Обработчик клика по странице для авто-воспроизведения (обход блокировки) ----
-            function enableAudioOnInteraction() {
-                // Пытаемся включить музыку при первом клике/тапе
-                if (!isPlaying) {
-                    audio.play().then(() => {
-                        isPlaying = true;
-                        musicBtn.textContent = '🔊 Музыка играет';
-                        musicBtn.classList.add('playing');
-                    }).catch(() => {});
-                }
-                // Удаляем обработчик после первого клика
-                document.removeEventListener('click', enableAudioOnInteraction);
-                document.removeEventListener('touchstart', enableAudioOnInteraction);
-            }
-
-            // ---- Инициализация ----
-            function init() {
-                // Если есть хотя бы одно изображение, запускаем слайд-шоу
-                if (images.length > 0) {
-                    startSlideshow();
-                } else {
-                    // Если картинок нет – можно задать цвет фона
-                    container.style.background = '#1a1a2e';
-                }
-
-                // Обработчик кнопки музыки
-                musicBtn.addEventListener('click', function(e) {
-                    e.stopPropagation(); // чтобы не сработал клик по документу
-                    toggleMusic();
+            function playMusic() {
+                if (musicStarted) return;
+                audio.play().then(() => {
+                    musicStarted = true;
+                }).catch(() => {
+                    // если заблокировано – ничего не делаем, ждём клика
                 });
-
-                // При первом взаимодействии с документом пытаемся запустить музыку
-                document.addEventListener('click', enableAudioOnInteraction);
-                document.addEventListener('touchstart', enableAudioOnInteraction);
-
-                // Если музыка уже загружена и можно играть, пробуем сразу (но браузер может блокировать)
-                // Поэтому лучше положиться на клик.
             }
 
-            // Запускаем после полной загрузки страницы
-            window.addEventListener('load', init);
+            // Пытаемся запустить сразу
+            playMusic();
+
+            // При любом клике/тапе по странице запускаем, если ещё не играет
+            document.addEventListener('click', playMusic, { once: false });
+            document.addEventListener('touchstart', playMusic, { once: false });
+
+            // ---- (Опционально) обновление информации о карте/игроках ----
+            // Здесь можно дописать получение данных от GMod через net, но для простоты оставляем статику
+            // Можно динамически менять через JS, если будете передавать данные.
+
+            // ---- Обновление счётчика игроков (пример, если есть API) ----
+            // Например, можно опрашивать сервер, но для загрузочного экрана это не обязательно.
+
+            // Просто для красоты – имитация загрузки
+            const mapNameElem = document.getElementById('map-name');
+            const playersElem = document.getElementById('players-count');
+
+            // Если хотите реальные данные – используйте net или WebSocket, но это выходит за рамки.
+            // Оставим как статику.
+            mapNameElem.textContent = 'Ожидание...';
+            playersElem.textContent = '0';
+
+            // Можно периодически обновлять через интервал, но не обязательно.
         })();
     </script>
 
