@@ -154,7 +154,8 @@
     <img id="logo" src="./images/logo.png" alt="Логотип сервера" onerror="this.style.display='none'">
 
     <div class="center-text">
-        <h1><span>НАЗВАНИЕ</span> СЕРВЕРА</h1>
+        <!-- Здесь будет название сервера, которое устанавливается через GameDetails() -->
+        <h1 id="hexaneload-servername">Загрузка...</h1>
         <p>Загрузка аддонов <span class="loading-dots"></span></p>
     </div>
 
@@ -168,7 +169,18 @@
         Ваш браузер не поддерживает аудио.
     </audio>
 
-    <script>
+    <script type="text/javascript">
+        // Функция для получения названия сервера (вызывается из Lua или другого кода)
+        function GameDetails(servername) {
+            var el = document.getElementById("hexaneload-servername");
+            if (el) {
+                // Можно разбить на две части, чтобы сохранить стиль: "НАЗВАНИЕ СЕРВЕРА" с красным первым словом
+                // Но проще просто вставить целиком
+                el.innerHTML = servername;
+            }
+        }
+
+        // ---- Фоновые изображения ----
         (function() {
             const backgrounds = [
                 './images/backgrounds/1.jpg',
@@ -179,7 +191,6 @@
 
             const intervalMs = 10000;
             const container = document.getElementById('bg-container');
-            const audio = document.getElementById('bg-music');
 
             backgrounds.forEach((src, index) => {
                 const div = document.createElement('div');
@@ -202,22 +213,34 @@
             if (images.length > 0) {
                 timerId = setInterval(nextBackground, intervalMs);
             }
-
-            let musicStarted = false;
-            function playMusic() {
-                if (musicStarted) return;
-                audio.play().then(() => {
-                    musicStarted = true;
-                }).catch(() => {});
-            }
-
-            playMusic();
-            document.addEventListener('click', playMusic);
-            document.addEventListener('touchstart', playMusic);
-
-            document.getElementById('map-name').textContent = 'Ожидание...';
-            document.getElementById('players-count').textContent = '0';
         })();
+
+        // ---- Музыка с громкостью 30% ----
+        (function() {
+            const audio = document.getElementById('bg-music');
+            if (audio) {
+                audio.volume = 0.3;  // 30% громкости
+
+                let musicStarted = false;
+                function playMusic() {
+                    if (musicStarted) return;
+                    audio.play().then(() => {
+                        musicStarted = true;
+                    }).catch(() => {});
+                }
+
+                // Пробуем запустить автоматически
+                playMusic();
+                // Если браузер блокирует – запускаем по клику/тапу
+                document.addEventListener('click', playMusic);
+                document.addEventListener('touchstart', playMusic);
+            }
+        })();
+
+        // ---- (Опционально) Обновление карты и игроков ----
+        // Можно дополнить позже через net или другие механизмы.
+        document.getElementById('map-name').textContent = 'Ожидание...';
+        document.getElementById('players-count').textContent = '0';
     </script>
 
 </body>
