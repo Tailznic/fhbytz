@@ -24,27 +24,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # НОВЫЙ ШАГ: Автоматически собираем все файлы из папки в массив JS
-      - name: Generate media.js
-        run: |
-          python3 -c '
-          import os, json
-          exts = (".jpg", ".jpeg", ".png", ".gif", ".mp4", ".webm")
-          d = "images/backgrounds"
-          # Ищем файлы, если папка существует
-          files = ["./" + d + "/" + f for f in os.listdir(d) if f.lower().endswith(exts)] if os.path.exists(d) else []
-          # Записываем результат в файл media.js
-          with open("media.js", "w") as f:
-              f.write("const backgrounds = " + json.dumps(files) + ";\n")
-          '
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'   # загружает всю папку (включая сгенерированный media.js)
+          path: '.'   # загружает всю папку (включая html, images, music)
 
       - name: Deploy to GitHub Pages
         id: deployment
