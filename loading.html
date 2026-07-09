@@ -179,6 +179,240 @@
         Ваш браузер не поддерживает аудио.
     </audio>
 
+    <!-- Подключаем файл, который генерируется через GitHub Actions -->
+    <script src="./media.js"></script>
+
+    <script type="text/javascript">
+        // Функция для установки названия сервера (вызывается из Garry's Mod / Lua)
+        function GameDetails(servername) {
+            var el = document.getElementById("hexaneload-servername");
+            if (el) {
+                el.innerHTML = servername;
+            }
+        }
+
+        // ---- Фоновые изображения и видео ----
+        (function() {
+            const intervalMs = 10000; // 10 секунд на один слайд
+            const container = document.getElementById('bg-container');
+
+            // Проверяем, загрузился ли массив backgrounds из media.js
+            if (typeof backgrounds !== 'undefined' && backgrounds.length > 0) {
+                backgrounds.forEach((src, index) => {
+                    const ext = src.split('.').pop().toLowerCase();
+                    let element;
+
+                    if (ext === 'mp4' || ext === 'webm') {
+                        // Создаем видео
+                        element = document.createElement('video');
+                        element.src = src;
+                        element.className = 'bg-media bg-video';
+                        element.autoplay = true;
+                        element.loop = true;
+                        element.muted = true; // Обязательно для движка Chromium, чтобы видео стартовало
+                        element.playsInline = true;
+                    } else {
+                        // Создаем картинку/гифку
+                        element = document.createElement('div');
+                        element.className = 'bg-media bg-image';
+                        element.style.backgroundImage = `url('${src}')`;
+                    }
+
+                    if (index === 0) element.classList.add('active');
+                    container.appendChild(element);
+                });
+
+                const mediaElements = container.querySelectorAll('.bg-media');
+                let currentIndex = 0;
+
+                function nextBackground() {
+                    mediaElements[currentIndex].classList.remove('active');
+                    currentIndex = (currentIndex + 1) % mediaElements.length;
+                    mediaElements[currentIndex].classList.add('active');
+                }
+
+                // Запускаем переключение, только если медиафайлов больше одного
+                if (mediaElements.length > 1) {
+                    setInterval(nextBackground, intervalMs);
+                }
+            } else {
+                console.warn("Файлы фонов не найдены или media.js не загрузился должным образом.");
+            }
+        })();
+
+        // ---- Музыка с громкостью 10% ----
+        (function() {
+            const audio = document.getElementById('bg-music');
+            if (audio) {
+                audio.volume = 0.1;  // 10% громкости
+
+                let musicStarted = false;
+                function playMusic() {
+                    if (musicStarted) return;
+                    audio.play().then(() => {
+                        musicStarted = true;
+                    }).catch(() => {});
+                }
+
+                // Пытаемся запустить сразу, а также по клику (из-за политик браузеров)
+                playMusic();
+                document.addEventListener('click', playMusic);
+                document.addEventListener('touchstart', playMusic);
+            }
+        })();
+
+        // ---- Информация о карте и игроках ----
+        document.getElementById('map-name').textContent = 'Ожидание...';
+        document.getElementById('players-count').textContent = '0';
+    </script>
+
+</body>
+</html>
+            background: #1a1a2e;
+        }
+
+        /* Общий класс для медиа (и видео, и картинки) */
+        .bg-media {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 2.5s ease-in-out;
+        }
+
+        /* Настройки для картинок/гифок */
+        .bg-image {
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Настройки для видео */
+        .bg-video {
+            object-fit: cover;
+        }
+
+        /* Активный фон */
+        .bg-media.active {
+            opacity: 1;
+        }
+
+        #logo {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 2;
+            max-width: 220px;
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
+        }
+
+        .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 0 30px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+
+        .center-text h1 {
+            font-size: 3.8rem;
+            letter-spacing: 6px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        .center-text h1 span {
+            color: #cc0000;
+        }
+
+        .center-text p {
+            font-size: 1.5rem;
+            opacity: 0.8;
+            letter-spacing: 2px;
+            color: #dddddd;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2;
+            background: rgba(10, 10, 12, 0.85);
+            border-top: 2px solid #880000;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #aaa;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .bottom-bar .left {
+            color: #aaa;
+        }
+
+        .bottom-bar .right {
+            color: #888;
+        }
+
+        .bottom-bar .highlight {
+            color: #cc0000;
+            font-weight: bold;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.8s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        @media (max-width: 768px) {
+            .center-text h1 { font-size: 2.2rem; letter-spacing: 3px; }
+            .center-text p { font-size: 1rem; }
+            #logo { max-width: 140px; top: 20px; left: 20px; }
+            .bottom-bar { flex-direction: column; gap: 6px; padding: 12px 20px; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-container"></div>
+
+    <img id="logo" src="./images/logo.png" alt="Логотип сервера" onerror="this.style.display='none'">
+
+    <div class="center-text">
+        <h1 id="hexaneload-servername"><span>НАЗВАНИЕ</span> СЕРВЕРА</h1>
+        <p>Загрузка аддонов <span class="loading-dots"></span></p>
+    </div>
+
+    <div class="bottom-bar">
+        <span class="left">⚡ <span class="highlight">Добро пожаловать</span> &nbsp;|&nbsp; <span id="map-name">Карта загружается...</span></span>
+        <span class="right">v1.0 &nbsp;|&nbsp; <span id="players-count">0</span> игроков</span>
+    </div>
+
+    <audio id="bg-music" loop preload="auto">
+        <source src="./music/theme.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио.
+    </audio>
+
     <script type="text/javascript">
         // Функция для установки названия сервера
         function GameDetails(servername) {
