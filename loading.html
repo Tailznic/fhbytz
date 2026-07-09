@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Загрузка...</title>
 
-    <!-- Подключаем шрифт Share Tech Mono (локально) -->
     <style>
         @font-face {
             font-family: 'Share Tech Mono';
@@ -25,10 +24,9 @@
             height: 100%;
             overflow: hidden;
             font-family: 'Share Tech Mono', 'Arial', monospace;
-            background: #0a0a0c;
+            background: #1a1a2e;
         }
 
-        /* Контейнер для фоновых изображений */
         #bg-container {
             position: fixed;
             top: 0;
@@ -36,7 +34,7 @@
             width: 100%;
             height: 100%;
             z-index: 0;
-            background: #0a0a0c;
+            background: #1a1a2e;
         }
 
         .bg-image {
@@ -55,18 +53,6 @@
             opacity: 1;
         }
 
-        /* Полупрозрачное затемнение */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 10, 12, 0.65);
-            z-index: 1;
-        }
-
-        /* Логотип (слева сверху) */
         #logo {
             position: fixed;
             top: 30px;
@@ -74,10 +60,9 @@
             z-index: 2;
             max-width: 220px;
             height: auto;
-            filter: drop-shadow(0 0 15px rgba(0,0,0,0.8));
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
         }
 
-        /* Центральный блок */
         .center-text {
             position: absolute;
             top: 50%;
@@ -86,7 +71,7 @@
             z-index: 2;
             color: #fff;
             text-align: center;
-            text-shadow: 0 0 30px rgba(0,0,0,0.95);
+            text-shadow: 0 0 30px rgba(0,0,0,0.8);
             pointer-events: none;
         }
 
@@ -95,8 +80,8 @@
             letter-spacing: 6px;
             margin-bottom: 10px;
             font-weight: 700;
-            color: #ffffff;
             text-transform: uppercase;
+            color: #ffffff;
         }
 
         .center-text h1 span {
@@ -105,20 +90,18 @@
 
         .center-text p {
             font-size: 1.5rem;
-            opacity: 0.75;
-            font-weight: 300;
+            opacity: 0.8;
             letter-spacing: 2px;
             color: #dddddd;
         }
 
-        /* Нижняя информационная строка (стиль как в голосовании) */
         .bottom-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
             z-index: 2;
-            background: rgba(10, 10, 12, 0.9);
+            background: rgba(10, 10, 12, 0.85);
             border-top: 2px solid #880000;
             padding: 16px 30px;
             display: flex;
@@ -143,7 +126,6 @@
             font-weight: bold;
         }
 
-        /* Маленькая анимация точек загрузки */
         .loading-dots::after {
             content: '';
             animation: dots 1.8s steps(4, end) infinite;
@@ -157,7 +139,6 @@
             100% { content: ''; }
         }
 
-        /* Адаптивность */
         @media (max-width: 768px) {
             .center-text h1 { font-size: 2.2rem; letter-spacing: 3px; }
             .center-text p { font-size: 1rem; }
@@ -168,28 +149,20 @@
 </head>
 <body>
 
-    <!-- Контейнер фонов -->
     <div id="bg-container"></div>
 
-    <!-- Затемнение -->
-    <div class="overlay"></div>
-
-    <!-- Логотип -->
     <img id="logo" src="./images/logo.png" alt="Логотип сервера" onerror="this.style.display='none'">
 
-    <!-- Центральный текст -->
     <div class="center-text">
         <h1><span>НАЗВАНИЕ</span> СЕРВЕРА</h1>
         <p>Загрузка аддонов <span class="loading-dots"></span></p>
     </div>
 
-    <!-- Нижняя панель (информация, стиль как в голосовании) -->
     <div class="bottom-bar">
         <span class="left">⚡ <span class="highlight">Добро пожаловать</span> &nbsp;|&nbsp; <span id="map-name">Карта загружается...</span></span>
         <span class="right">v1.0 &nbsp;|&nbsp; <span id="players-count">0</span> игроков</span>
     </div>
 
-    <!-- Аудио (автозапуск, но браузер может заблокировать) -->
     <audio id="bg-music" loop preload="auto">
         <source src="./music/theme.mp3" type="audio/mpeg">
         Ваш браузер не поддерживает аудио.
@@ -197,20 +170,17 @@
 
     <script>
         (function() {
-            // ---- Список фоновых изображений (PNG) ----
             const backgrounds = [
-                './images/backgrounds/1.png',
-                './images/backgrounds/2.png',
-                './images/backgrounds/3.png',
-                './images/backgrounds/4.png',
-                // добавляйте свои
+                './images/backgrounds/1.jpg',
+                './images/backgrounds/2.jpg',
+                './images/backgrounds/3.jpg',
+                './images/backgrounds/4.png'
             ];
 
-            const intervalMs = 10000;   // 10 секунд между сменами
+            const intervalMs = 10000;
             const container = document.getElementById('bg-container');
             const audio = document.getElementById('bg-music');
 
-            // ---- Создаём элементы картинок ----
             backgrounds.forEach((src, index) => {
                 const div = document.createElement('div');
                 div.className = 'bg-image';
@@ -233,42 +203,20 @@
                 timerId = setInterval(nextBackground, intervalMs);
             }
 
-            // ---- Автовоспроизведение музыки ----
             let musicStarted = false;
-
             function playMusic() {
                 if (musicStarted) return;
                 audio.play().then(() => {
                     musicStarted = true;
-                }).catch(() => {
-                    // если заблокировано – ничего не делаем, ждём клика
-                });
+                }).catch(() => {});
             }
 
-            // Пытаемся запустить сразу
             playMusic();
+            document.addEventListener('click', playMusic);
+            document.addEventListener('touchstart', playMusic);
 
-            // При любом клике/тапе по странице запускаем, если ещё не играет
-            document.addEventListener('click', playMusic, { once: false });
-            document.addEventListener('touchstart', playMusic, { once: false });
-
-            // ---- (Опционально) обновление информации о карте/игроках ----
-            // Здесь можно дописать получение данных от GMod через net, но для простоты оставляем статику
-            // Можно динамически менять через JS, если будете передавать данные.
-
-            // ---- Обновление счётчика игроков (пример, если есть API) ----
-            // Например, можно опрашивать сервер, но для загрузочного экрана это не обязательно.
-
-            // Просто для красоты – имитация загрузки
-            const mapNameElem = document.getElementById('map-name');
-            const playersElem = document.getElementById('players-count');
-
-            // Если хотите реальные данные – используйте net или WebSocket, но это выходит за рамки.
-            // Оставим как статику.
-            mapNameElem.textContent = 'Ожидание...';
-            playersElem.textContent = '0';
-
-            // Можно периодически обновлять через интервал, но не обязательно.
+            document.getElementById('map-name').textContent = 'Ожидание...';
+            document.getElementById('players-count').textContent = '0';
         })();
     </script>
 
