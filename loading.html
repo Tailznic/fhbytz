@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Контейнер для фона с анимацией */
+        #bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: #1a1a2e; /* цвет на случай, если картинки не загрузятся */
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 2.5s ease-in-out;
+        }
+
+        .bg-image.active {
+            opacity: 1;
+        }
+
+        /* Затемнение для лучшей читаемости текста */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 1;
+        }
+
+        /* Логотип (слева сверху) */
+        #logo {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 2;
+            max-width: 220px;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.7));
+        }
+
+        /* Центральный текст */
+        .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 0 30px rgba(0,0,0,0.9);
+            pointer-events: none;
+        }
+
+        .center-text h1 {
+            font-size: 4rem;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .center-text p {
+            font-size: 1.5rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        /* Кнопка включения музыки (по центру снизу) */
+        #music-btn {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            padding: 12px 28px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 40px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            letter-spacing: 1px;
+            font-weight: 400;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        #music-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #fff;
+            transform: translateX(-50%) scale(1.03);
+        }
+
+        #music-btn.playing {
+            background: rgba(255, 200, 50, 0.2);
+            border-color: #ffd966;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .center-text h1 { font-size: 2.5rem; }
+            .center-text p { font-size: 1rem; }
+            #logo { max-width: 140px; top: 20px; left: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Контейнер фоновых картинок -->
+    <div id="bg-container"></div>
+
+    <!-- Затемнение -->
+    <div class="overlay"></div>
+
+    <!-- Логотип -->
+    <img id="logo" src="./images/logo.png" alt="Логотип сервера" onerror="this.style.display='none'">
+
+    <!-- Центральный текст (можно изменить под свой сервер) -->
+    <div class="center-text">
+        <h1>НАЗВАНИЕ СЕРВЕРА</h1>
+        <p>Загрузка аддонов...</p>
+    </div>
+
+    <!-- Кнопка для включения музыки -->
+    <button id="music-btn" class="playing">🎵 Включить музыку</button>
+
+    <!-- Аудио элемент (скрытый) -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="./music/theme.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио.
+    </audio>
+
+    <script>
+        (function() {
+            // ---- Список фоновых изображений (PNG) ----
+            // Добавьте сюда свои файлы (имена или пути)
+            const backgrounds = [
+                './images/backgrounds/1.png',
+                './images/backgrounds/2.png',
+                './images/backgrounds/3.png',
+                './images/backgrounds/4.png',
+                // ... продолжайте список
+            ];
+
+            // ---- Настройки смены фона ----
+            const intervalMs = 10000;      // пауза между сменами (10 сек)
+            const fadeDuration = 2500;     // длительность перехода (2.5 сек)
+
+            // ---- Элементы DOM ----
+            const container = document.getElementById('bg-container');
+            const musicBtn = document.getElementById('music-btn');
+            const audio = document.getElementById('bg-music');
+
+            // ---- Переменные состояния ----
+            let currentIndex = 0;
+            let timerId = null;
+            let isPlaying = false;
+
+            // ---- Создаём элементы картинок ----
+            backgrounds.forEach((src, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-image';
+                div.style.backgroundImage = `url('${src}')`;
+                if (index === 0) div.classList.add('active');
+                container.appendChild(div);
+            });
+
+            const images = container.querySelectorAll('.bg-image');
+
+            // ---- Функция смены фона ----
+            function nextBackground() {
+                // Убираем активный класс у текущего
+                images[currentIndex].classList.remove('active');
+                // Переходим к следующему
+                currentIndex = (currentIndex + 1) % images.length;
+                images[currentIndex].classList.add('active');
+            }
+
+            // ---- Запускаем таймер смены фонов ----
+            function startSlideshow() {
+                if (timerId) clearInterval(timerId);
+                timerId = setInterval(nextBackground, intervalMs);
+            }
+
+            // ---- Управление музыкой ----
+            function toggleMusic() {
+                if (isPlaying) {
+                    audio.pause();
+                    isPlaying = false;
+                    musicBtn.textContent = '🎵 Включить музыку';
+                    musicBtn.classList.remove('playing');
+                } else {
+                    // Попытка воспроизведения (может быть заблокирована браузером)
+                    audio.play().then(() => {
+                        isPlaying = true;
+                        musicBtn.textContent = '🔊 Музыка играет';
+                        musicBtn.classList.add('playing');
+                    }).catch(() => {
+                        // Если блокировка – показываем сообщение
+                        alert('Для воспроизведения музыки нажмите на страницу, затем снова нажмите кнопку.');
+                        // Повторная попытка по клику будет работать
+                    });
+                }
+            }
+
+            // ---- Обработчик клика по странице для авто-воспроизведения (обход блокировки) ----
+            function enableAudioOnInteraction() {
+                // Пытаемся включить музыку при первом клике/тапе
+                if (!isPlaying) {
+                    audio.play().then(() => {
+                        isPlaying = true;
+                        musicBtn.textContent = '🔊 Музыка играет';
+                        musicBtn.classList.add('playing');
+                    }).catch(() => {});
+                }
+                // Удаляем обработчик после первого клика
+                document.removeEventListener('click', enableAudioOnInteraction);
+                document.removeEventListener('touchstart', enableAudioOnInteraction);
+            }
+
+            // ---- Инициализация ----
+            function init() {
+                // Если есть хотя бы одно изображение, запускаем слайд-шоу
+                if (images.length > 0) {
+                    startSlideshow();
+                } else {
+                    // Если картинок нет – можно задать цвет фона
+                    container.style.background = '#1a1a2e';
+                }
+
+                // Обработчик кнопки музыки
+                musicBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // чтобы не сработал клик по документу
+                    toggleMusic();
+                });
+
+                // При первом взаимодействии с документом пытаемся запустить музыку
+                document.addEventListener('click', enableAudioOnInteraction);
+                document.addEventListener('touchstart', enableAudioOnInteraction);
+
+                // Если музыка уже загружена и можно играть, пробуем сразу (но браузер может блокировать)
+                // Поэтому лучше положиться на клик.
+            }
+
+            // Запускаем после полной загрузки страницы
+            window.addEventListener('load', init);
+        })();
+    </script>
+
+</body>
+</html>
