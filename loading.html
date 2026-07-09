@@ -154,8 +154,7 @@
     <img id="logo" src="./images/logo.png" alt="Логотип сервера" onerror="this.style.display='none'">
 
     <div class="center-text">
-        <!-- Здесь будет название сервера, которое устанавливается через GameDetails() -->
-        <h1 id="hexaneload-servername">Загрузка...</h1>
+        <h1 id="hexaneload-servername"><span>НАЗВАНИЕ</span> СЕРВЕРА</h1>
         <p>Загрузка аддонов <span class="loading-dots"></span></p>
     </div>
 
@@ -170,26 +169,25 @@
     </audio>
 
     <script type="text/javascript">
-        // Функция для получения названия сервера (вызывается из Lua или другого кода)
+        // Функция для установки названия сервера (вызывается из Lua или другого кода)
         function GameDetails(servername) {
             var el = document.getElementById("hexaneload-servername");
             if (el) {
-                // Можно разбить на две части, чтобы сохранить стиль: "НАЗВАНИЕ СЕРВЕРА" с красным первым словом
-                // Но проще просто вставить целиком
                 el.innerHTML = servername;
             }
         }
 
-        // ---- Фоновые изображения ----
+        // ---- Фоновые изображения (смена каждые 10 сек) ----
         (function() {
             const backgrounds = [
                 './images/backgrounds/1.jpg',
                 './images/backgrounds/2.jpg',
                 './images/backgrounds/3.jpg',
                 './images/backgrounds/4.png'
+                // Добавьте свои файлы
             ];
 
-            const intervalMs = 10000;
+            const intervalMs = 10000; // 10 секунд
             const container = document.getElementById('bg-container');
 
             backgrounds.forEach((src, index) => {
@@ -202,7 +200,6 @@
 
             const images = container.querySelectorAll('.bg-image');
             let currentIndex = 0;
-            let timerId = null;
 
             function nextBackground() {
                 images[currentIndex].classList.remove('active');
@@ -211,15 +208,15 @@
             }
 
             if (images.length > 0) {
-                timerId = setInterval(nextBackground, intervalMs);
+                setInterval(nextBackground, intervalMs);
             }
         })();
 
-        // ---- Музыка с громкостью 30% ----
+        // ---- Музыка с громкостью 10% ----
         (function() {
             const audio = document.getElementById('bg-music');
             if (audio) {
-                audio.volume = 0.1;  // 30% громкости
+                audio.volume = 0.1;  // 10% громкости
 
                 let musicStarted = false;
                 function playMusic() {
@@ -229,16 +226,13 @@
                     }).catch(() => {});
                 }
 
-                // Пробуем запустить автоматически
                 playMusic();
-                // Если браузер блокирует – запускаем по клику/тапу
                 document.addEventListener('click', playMusic);
                 document.addEventListener('touchstart', playMusic);
             }
         })();
 
-        // ---- (Опционально) Обновление карты и игроков ----
-        // Можно дополнить позже через net или другие механизмы.
+        // ---- (Опционально) информация о карте и игроках ----
         document.getElementById('map-name').textContent = 'Ожидание...';
         document.getElementById('players-count').textContent = '0';
     </script>
