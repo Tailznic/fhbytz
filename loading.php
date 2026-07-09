@@ -37,19 +37,30 @@
             background: #1a1a2e;
         }
 
-        .bg-image {
+        /* Общий класс для медиа (и видео, и картинки) */
+        .bg-media {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-size: cover;
-            background-position: center;
             opacity: 0;
             transition: opacity 2.5s ease-in-out;
         }
 
-        .bg-image.active {
+        /* Настройки для картинок/гифок */
+        .bg-image {
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Настройки для видео */
+        .bg-video {
+            object-fit: cover;
+        }
+
+        /* Активный фон */
+        .bg-media.active {
             opacity: 1;
         }
 
@@ -169,7 +180,7 @@
     </audio>
 
     <script type="text/javascript">
-        // Функция для установки названия сервера (вызывается из Lua или другого кода)
+        // Функция для установки названия сервера
         function GameDetails(servername) {
             var el = document.getElementById("hexaneload-servername");
             if (el) {
@@ -177,38 +188,66 @@
             }
         }
 
-        // ---- Фоновые изображения (смена каждые 10 сек) ----
+        // ---- Фоновые изображения и видео ----
         (function() {
-            const backgrounds = [
-                './images/backgrounds/1.jpg',
-                './images/backgrounds/2.jpg',
-                './images/backgrounds/3.jpg',
-                './images/backgrounds/4.png'
-                // Добавьте свои файлы
-            ];
+            // PHP считывает ВСЕ файлы (jpg, png, gif, webm, mp4) и передает их в JavaScript
+            const backgrounds = <?php
+                $dir = 'images/backgrounds/';
+                // Ищем все популярные форматы изображений и видео
+                $files = glob($dir . '*.{jpg,jpeg,png,gif,mp4,webm}', GLOB_BRACE);
+                
+                $files_with_dots = [];
+                if ($files) {
+                    foreach ($files as $file) {
+                        $files_with_dots[] = './' . $file;
+                    }
+                }
+                echo json_encode($files_with_dots);
+            ?>;
 
             const intervalMs = 10000; // 10 секунд
             const container = document.getElementById('bg-container');
 
-            backgrounds.forEach((src, index) => {
-                const div = document.createElement('div');
-                div.className = 'bg-image';
-                div.style.backgroundImage = `url('${src}')`;
-                if (index === 0) div.classList.add('active');
-                container.appendChild(div);
-            });
+            if (backgrounds && backgrounds.length > 0) {
+                backgrounds.forEach((src, index) => {
+                    // Проверяем расширение файла
+                    const ext = src.split('.').pop().toLowerCase();
+                    let element;
 
-            const images = container.querySelectorAll('.bg-image');
-            let currentIndex = 0;
+                    if (ext === 'mp4' || ext === 'webm') {
+                        // Если это видео, создаем тег <video>
+                        element = document.createElement('video');
+                        element.src = src;
+                        element.className = 'bg-media bg-video';
+                        element.autoplay = true;
+                        element.loop = true;
+                        element.muted = true; // Обязательно для движка Chromium, иначе видео не начнется само
+                    } else {
+                        // Если это картинка/гифка, создаем <div>
+                        element = document.createElement('div');
+                        element.className = 'bg-media bg-image';
+                        element.style.backgroundImage = `url('${src}')`;
+                    }
 
-            function nextBackground() {
-                images[currentIndex].classList.remove('active');
-                currentIndex = (currentIndex + 1) % images.length;
-                images[currentIndex].classList.add('active');
-            }
+                    if (index === 0) element.classList.add('active');
+                    container.appendChild(element);
+                });
 
-            if (images.length > 0) {
-                setInterval(nextBackground, intervalMs);
+                const mediaElements = container.querySelectorAll('.bg-media');
+                let currentIndex = 0;
+
+                function nextBackground() {
+                    mediaElements[currentIndex].classList.remove('active');
+                    currentIndex = (currentIndex + 1) % mediaElements.length;
+                    mediaElements[currentIndex].classList.add('active');
+                }
+
+                // Запускаем слайдер, если файлов больше одного
+                if (mediaElements.length > 1) {
+                    setInterval(nextBackground, intervalMs);
+                }
+            } else {
+                console.warn("Файлы в папке images/backgrounds/ не найдены.");
             }
         })();
 
@@ -232,7 +271,7 @@
             }
         })();
 
-        // ---- (Опционально) информация о карте и игроках ----
+        // ---- Информация о карте и игроках ----
         document.getElementById('map-name').textContent = 'Ожидание...';
         document.getElementById('players-count').textContent = '0';
     </script>
