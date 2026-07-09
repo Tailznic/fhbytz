@@ -2,62 +2,240 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Загрузка</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка...</title>
+
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
-        #bg-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        .bg-image {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
-            opacity: 0; transition: opacity 1.5s ease-in-out;
+        @font-face {
+            font-family: 'Share Tech Mono';
+            src: url('./resource/fonts/ShareTechMonoRegular_0.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
-        .bg-image.active { opacity: 1; }
-        .center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; color: #fff; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Share Tech Mono', 'Arial', monospace;
+            background: #1a1a2e;
+        }
+
+        #bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: #1a1a2e;
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 2.5s ease-in-out;
+        }
+
+        .bg-image.active {
+            opacity: 1;
+        }
+
+        #logo {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 2;
+            max-width: 220px;
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
+        }
+
+        .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 0 30px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+
+        .center-text h1 {
+            font-size: 3.8rem;
+            letter-spacing: 6px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        .center-text h1 span {
+            color: #cc0000;
+        }
+
+        .center-text p {
+            font-size: 1.5rem;
+            opacity: 0.8;
+            letter-spacing: 2px;
+            color: #dddddd;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2;
+            background: rgba(10, 10, 12, 0.85);
+            border-top: 2px solid #880000;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #aaa;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .bottom-bar .left {
+            color: #aaa;
+        }
+
+        .bottom-bar .right {
+            color: #888;
+        }
+
+        .bottom-bar .highlight {
+            color: #cc0000;
+            font-weight: bold;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.8s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        @media (max-width: 768px) {
+            .center-text h1 { font-size: 2.2rem; letter-spacing: 3px; }
+            .center-text p { font-size: 1rem; }
+            #logo { max-width: 140px; top: 20px; left: 20px; }
+            .bottom-bar { flex-direction: column; gap: 6px; padding: 12px 20px; font-size: 0.75rem; }
+        }
     </style>
 </head>
 <body>
 
     <div id="bg-container"></div>
+
+    <img id="logo" src="./images/logo.png" alt="Логотип сервера" onerror="this.style.display='none'">
+
     <div class="center-text">
-        <h1 id="servername">Загрузка сервера...</h1>
+        <h1 id="hexaneload-servername"><span>НАЗВАНИЕ</span> СЕРВЕРА</h1>
+        <p>Загрузка аддонов <span class="loading-dots"></span></p>
     </div>
 
+    <div class="bottom-bar">
+        <span class="left">⚡ <span class="highlight">Добро пожаловать</span> &nbsp;|&nbsp; <span id="map-name">Карта загружается...</span></span>
+        <span class="right">v1.0 &nbsp;|&nbsp; <span id="players-count">0</span> игроков</span>
+    </div>
+
+    <audio id="bg-music" loop preload="auto">
+        <source src="./music/theme.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио.
+    </audio>
+
     <script type="text/javascript">
-        // --- ВПИСЫВАЙ СЮДА ИМЕНА ФАЙЛОВ ИЗ ПАПКИ images/backgrounds/ ---
-        // Например: './images/backgrounds/1.jpg', './images/backgrounds/2.png'
-        const backgrounds = [
-            './images/backgrounds/1.jpg',
-            './images/backgrounds/2.png',
-            './images/backgrounds/3.gif'
-        ];
-
-        const container = document.getElementById('bg-container');
-
-        backgrounds.forEach((src, index) => {
-            const div = document.createElement('div');
-            div.className = 'bg-image';
-            div.style.backgroundImage = `url('${src}')`;
-            if (index === 0) div.classList.add('active');
-            container.appendChild(div);
-        });
-
-        const images = container.querySelectorAll('.bg-image');
-        let currentIndex = 0;
-
-        function nextBackground() {
-            images[currentIndex].classList.remove('active');
-            currentIndex = (currentIndex + 1) % images.length;
-            images[currentIndex].classList.add('active');
-        }
-
-        if (images.length > 0) {
-            setInterval(nextBackground, 5000);
-        }
-
-        // Функция от GMod
+        // Функция для установки названия сервера (вызывается из Lua или другого кода)
         function GameDetails(servername) {
-            document.getElementById("servername").textContent = servername;
+            var el = document.getElementById("hexaneload-servername");
+            if (el) {
+                el.innerHTML = servername;
+            }
         }
+
+        // ---- Фоновые изображения (смена каждые 10 сек) ----
+        (function() {
+            const backgrounds = [
+                './images/backgrounds/1.jpg',
+                './images/backgrounds/2.png',
+                './images/backgrounds/3.jpg',
+                './images/backgrounds/4.png'
+                // Добавьте свои файлы
+            ];
+
+            const intervalMs = 10000; // 10 секунд
+            const container = document.getElementById('bg-container');
+
+            backgrounds.forEach((src, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-image';
+                div.style.backgroundImage = `url('${src}')`;
+                if (index === 0) div.classList.add('active');
+                container.appendChild(div);
+            });
+
+            const images = container.querySelectorAll('.bg-image');
+            let currentIndex = 0;
+
+            function nextBackground() {
+                images[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % images.length;
+                images[currentIndex].classList.add('active');
+            }
+
+            if (images.length > 0) {
+                setInterval(nextBackground, intervalMs);
+            }
+        })();
+
+        // ---- Музыка с громкостью 10% ----
+        (function() {
+            const audio = document.getElementById('bg-music');
+            if (audio) {
+                audio.volume = 0.1;  // 10% громкости
+
+                let musicStarted = false;
+                function playMusic() {
+                    if (musicStarted) return;
+                    audio.play().then(() => {
+                        musicStarted = true;
+                    }).catch(() => {});
+                }
+
+                playMusic();
+                document.addEventListener('click', playMusic);
+                document.addEventListener('touchstart', playMusic);
+            }
+        })();
+
+        // ---- (Опционально) информация о карте и игроках ----
+        document.getElementById('map-name').textContent = 'Ожидание...';
+        document.getElementById('players-count').textContent = '0';
     </script>
+
 </body>
 </html>
